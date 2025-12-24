@@ -39,3 +39,34 @@
 
 # debug information files
 *.dwo
+
+# Build directories
+build/
+build-*/
+.cache/
+
+# vcpkg (legacy)
+vcpkg_installed/
+
+# Conan
+conan.lock
+conaninfo.txt
+conanbuildinfo.*
+graph_info.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+CMakeUserPresets.json
+
+# CodeQL
+_codeql_*
