@@ -1,10 +1,10 @@
 # SDL3Wheels
 
-SDL3Wheels - A clone of the classic DOS game "Wacky Wheels" built with SDL3, CMake, Ninja, and vcpkg.
+SDL3Wheels - A clone of the classic DOS game "Wacky Wheels" built with SDL2, CMake, Ninja, and vcpkg.
 
 ## About
 
-Wacky Wheels was a popular kart racing game from 1994. This project recreates the core gameplay mechanics using modern C++ and SDL3.
+Wacky Wheels was a popular kart racing game from 1994. This project recreates the core gameplay mechanics using modern C++ and SDL2.
 
 ## Features
 
@@ -113,7 +113,7 @@ SDL3Wheels/
 
 ## Technologies
 
-- **SDL3**: Graphics, input, and window management
+- **SDL2**: Graphics, input, and window management
 - **CMake**: Build system configuration
 - **Ninja**: Fast build execution
 - **vcpkg**: C++ package manager
