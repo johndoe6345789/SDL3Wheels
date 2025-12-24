@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 
 class InputHandler {
 public:
@@ -19,6 +19,6 @@ public:
     bool isSelectPressed() const;
     
 private:
-    const Uint8* currentKeyStates_;
-    Uint8 previousKeyStates_[SDL_NUM_SCANCODES];
+    const bool* currentKeyStates_;
+    bool previousKeyStates_[SDL_NUM_SCANCODES];
 };

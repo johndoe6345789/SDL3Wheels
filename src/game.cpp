@@ -2,7 +2,7 @@
 #include "kart.h"
 #include "track.h"
 #include "input_handler.h"
-#include "renderer.h"
+#include "sdl3_renderer.h"
 #include <iostream>
 
 Game::Game() 
@@ -21,30 +21,18 @@ Game::~Game() {
 }
 
 bool Game::init() {
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return false;
     }
     
-    window_ = SDL_CreateWindow(
-        "SDL3 Wheels - Wacky Wheels Clone",
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        800, 600,
-        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
-    );
-    
-    if (!window_) {
-        std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
+    if (!SDL_CreateWindowAndRenderer("SDL3 Wheels - Wacky Wheels Clone", 800, 600, 
+                                      SDL_WINDOW_RESIZABLE, &window_, &sdlRenderer_)) {
+        std::cerr << "SDL_CreateWindowAndRenderer Error: " << SDL_GetError() << std::endl;
         return false;
     }
     
-    sdlRenderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!sdlRenderer_) {
-        std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
-        return false;
-    }
-    
-    renderer_ = std::make_unique<Renderer>(sdlRenderer_);
+    renderer_ = std::make_unique<SDL3Renderer>(sdlRenderer_);
     track_ = std::make_unique<Track>();
     inputHandler_ = std::make_unique<InputHandler>();
     
@@ -61,10 +49,10 @@ bool Game::init() {
 }
 
 void Game::run() {
-    Uint32 lastTime = SDL_GetTicks();
+    Uint64 lastTime = SDL_GetTicks();
     
     while (running_) {
-        Uint32 currentTime = SDL_GetTicks();
+        Uint64 currentTime = SDL_GetTicks();
         float deltaTime = (currentTime - lastTime) / 1000.0f;
         lastTime = currentTime;
         
@@ -99,10 +87,10 @@ void Game::shutdown() {
 void Game::handleEvents() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
+        if (event.type == SDL_EVENT_QUIT) {
             running_ = false;
         }
-        if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
+        if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE) {
             if (state_ == GameState::RACING) {
                 state_ = GameState::PAUSED;
             } else if (state_ == GameState::PAUSED) {

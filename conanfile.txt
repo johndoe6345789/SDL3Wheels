@@ -1,0 +1,11 @@
+[requires]
+sdl/3.1.6
+
+[generators]
+CMakeDeps
+CMakeToolchain
+
+[options]
+
+[layout]
+cmake_layout

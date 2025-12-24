@@ -1,13 +1,13 @@
 #pragma once
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <memory>
 #include <vector>
 
 class Kart;
 class Track;
 class InputHandler;
-class Renderer;
+class IRenderer;
 
 enum class GameState {
     MENU,
@@ -38,7 +38,7 @@ private:
     SDL_Window* window_;
     SDL_Renderer* sdlRenderer_;
     
-    std::unique_ptr<Renderer> renderer_;
+    std::unique_ptr<IRenderer> renderer_;
     std::unique_ptr<Track> track_;
     std::unique_ptr<InputHandler> inputHandler_;
     std::vector<std::unique_ptr<Kart>> karts_;

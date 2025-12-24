@@ -1,24 +1,24 @@
-#include "renderer.h"
+#include "sdl3_renderer.h"
 #include "kart.h"
 #include "track.h"
 #include <sstream>
 #include <iomanip>
 
-Renderer::Renderer(SDL_Renderer* renderer)
+SDL3Renderer::SDL3Renderer(SDL_Renderer* renderer)
     : sdlRenderer_(renderer)
 {
 }
 
-void Renderer::clear() {
+void SDL3Renderer::clear() {
     SDL_SetRenderDrawColor(sdlRenderer_, 20, 100, 20, 255); // Dark green background
     SDL_RenderClear(sdlRenderer_);
 }
 
-void Renderer::present() {
+void SDL3Renderer::present() {
     SDL_RenderPresent(sdlRenderer_);
 }
 
-void Renderer::renderMenu(int selectedItem) {
+void SDL3Renderer::renderMenu(int selectedItem) {
     // Draw title
     drawText("SDL3 WHEELS", 250, 100, 3);
     drawText("Wacky Wheels Clone", 280, 160, 1);
@@ -27,8 +27,7 @@ void Renderer::renderMenu(int selectedItem) {
     const char* items[] = {"Start Race", "Options", "Quit"};
     for (int i = 0; i < 3; i++) {
         if (i == selectedItem) {
-            SDL_SetRenderDrawColor(sdlRenderer_, 255, 255, 0, 255);
-            SDL_FRect highlight = {250, 250 + i * 60, 300, 40};
+            Rect highlight = {250, 250 + i * 60.0f, 300, 40};
             fillRect(highlight, {255, 255, 0, 100});
         }
         drawText(items[i], 280, 255 + i * 60, 2);
@@ -37,31 +36,32 @@ void Renderer::renderMenu(int selectedItem) {
     drawText("Controls: Arrow Keys or WASD", 200, 500, 1);
 }
 
-void Renderer::renderTrack(const Track* track) {
+void SDL3Renderer::renderTrack(const Track* track) {
     // Draw track background
     SDL_SetRenderDrawColor(sdlRenderer_, 40, 140, 40, 255);
     SDL_RenderClear(sdlRenderer_);
     
     // Draw track segments (barriers)
     for (const auto& segment : track->getTrackSegments()) {
-        fillRect(segment, {100, 100, 100, 255});
+        Rect rect = {segment.x, segment.y, segment.w, segment.h};
+        fillRect(rect, {100, 100, 100, 255});
     }
     
     // Draw checkpoints (semi-transparent)
-    SDL_SetRenderDrawBlendMode(sdlRenderer_, SDL_BLENDMODE_BLEND);
+    setBlendMode(true);
     for (const auto& cp : track->getCheckpoints()) {
-        SDL_FRect rect = {cp.x, cp.y, cp.width, cp.height};
+        Rect rect = {cp.x, cp.y, cp.width, cp.height};
         fillRect(rect, {255, 255, 0, 80});
     }
-    SDL_SetRenderDrawBlendMode(sdlRenderer_, SDL_BLENDMODE_NONE);
+    setBlendMode(false);
 }
 
-void Renderer::renderKart(const Kart* kart) {
+void SDL3Renderer::renderKart(const Kart* kart) {
     Vector2 pos = kart->getPosition();
     float angle = kart->getAngle();
     
-    // Draw kart as a rotated rectangle
-    SDL_FRect kartRect = {pos.x - 15, pos.y - 10, 30, 20};
+    // Draw kart as a rectangle
+    Rect kartRect = {pos.x - 15, pos.y - 10, 30, 20};
     
     if (kart->isPlayer()) {
         fillRect(kartRect, {255, 0, 0, 255}); // Red for player
@@ -74,11 +74,10 @@ void Renderer::renderKart(const Kart* kart) {
     float dirX = pos.x + SDL_cosf(radians) * 20;
     float dirY = pos.y + SDL_sinf(radians) * 20;
     
-    SDL_SetRenderDrawColor(sdlRenderer_, 255, 255, 255, 255);
-    SDL_RenderDrawLineF(sdlRenderer_, pos.x, pos.y, dirX, dirY);
+    drawLine(pos.x, pos.y, dirX, dirY, {255, 255, 255, 255});
 }
 
-void Renderer::renderHUD(int currentLap, int totalLaps, float raceTime) {
+void SDL3Renderer::renderHUD(int currentLap, int totalLaps, float raceTime) {
     // Draw lap counter
     std::ostringstream lapText;
     lapText << "Lap: " << currentLap << "/" << totalLaps;
@@ -90,18 +89,18 @@ void Renderer::renderHUD(int currentLap, int totalLaps, float raceTime) {
     drawText(timeText.str(), 10, 40, 2);
 }
 
-void Renderer::renderPauseMenu() {
+void SDL3Renderer::renderPauseMenu() {
     // Draw semi-transparent overlay
-    SDL_SetRenderDrawBlendMode(sdlRenderer_, SDL_BLENDMODE_BLEND);
-    SDL_FRect overlay = {0, 0, 800, 600};
+    setBlendMode(true);
+    Rect overlay = {0, 0, 800, 600};
     fillRect(overlay, {0, 0, 0, 180});
-    SDL_SetRenderDrawBlendMode(sdlRenderer_, SDL_BLENDMODE_NONE);
+    setBlendMode(false);
     
     drawText("PAUSED", 320, 250, 3);
     drawText("Press ESC to Resume", 260, 320, 2);
 }
 
-void Renderer::renderFinishScreen(float finalTime) {
+void SDL3Renderer::renderFinishScreen(float finalTime) {
     SDL_SetRenderDrawColor(sdlRenderer_, 20, 20, 20, 255);
     SDL_RenderClear(sdlRenderer_);
     
@@ -114,31 +113,53 @@ void Renderer::renderFinishScreen(float finalTime) {
     drawText("Press Enter to Continue", 220, 400, 2);
 }
 
-void Renderer::drawText(const std::string& text, int x, int y, int size) {
+void SDL3Renderer::drawText(const std::string& text, int x, int y, int size) {
     // Simple character-by-character rendering using rectangles
     // This is a placeholder - in a real game you'd use SDL_ttf or bitmap fonts
     int charWidth = 8 * size;
     int charHeight = 12 * size;
     
     for (size_t i = 0; i < text.length(); i++) {
-        SDL_FRect charRect = {
+        Rect charRect = {
             static_cast<float>(x + i * charWidth),
             static_cast<float>(y),
             static_cast<float>(charWidth - 2),
             static_cast<float>(charHeight)
         };
         
-        SDL_SetRenderDrawColor(sdlRenderer_, 255, 255, 255, 255);
-        SDL_RenderFillRectF(sdlRenderer_, &charRect);
+        fillRect(charRect, {255, 255, 255, 255});
     }
 }
 
-void Renderer::drawRect(const SDL_FRect& rect, SDL_Color color) {
+void SDL3Renderer::drawRect(const Rect& rect, Color color) {
+    SDL_FRect sdlRect = toSDLRect(rect);
     SDL_SetRenderDrawColor(sdlRenderer_, color.r, color.g, color.b, color.a);
-    SDL_RenderDrawRectF(sdlRenderer_, &rect);
+    SDL_RenderRect(sdlRenderer_, &sdlRect);
 }
 
-void Renderer::fillRect(const SDL_FRect& rect, SDL_Color color) {
+void SDL3Renderer::fillRect(const Rect& rect, Color color) {
+    SDL_FRect sdlRect = toSDLRect(rect);
     SDL_SetRenderDrawColor(sdlRenderer_, color.r, color.g, color.b, color.a);
-    SDL_RenderFillRectF(sdlRenderer_, &rect);
+    SDL_RenderFillRect(sdlRenderer_, &sdlRect);
+}
+
+void SDL3Renderer::drawLine(float x1, float y1, float x2, float y2, Color color) {
+    SDL_SetRenderDrawColor(sdlRenderer_, color.r, color.g, color.b, color.a);
+    SDL_RenderLine(sdlRenderer_, x1, y1, x2, y2);
+}
+
+void SDL3Renderer::setBlendMode(bool enabled) {
+    if (enabled) {
+        SDL_SetRenderDrawBlendMode(sdlRenderer_, SDL_BLENDMODE_BLEND);
+    } else {
+        SDL_SetRenderDrawBlendMode(sdlRenderer_, SDL_BLENDMODE_NONE);
+    }
+}
+
+SDL_FRect SDL3Renderer::toSDLRect(const Rect& rect) const {
+    return SDL_FRect{rect.x, rect.y, rect.width, rect.height};
+}
+
+SDL_Color SDL3Renderer::toSDLColor(const Color& color) const {
+    return SDL_Color{color.r, color.g, color.b, color.a};
 }

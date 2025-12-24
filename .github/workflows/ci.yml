@@ -24,26 +24,29 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y ninja-build cmake
+        sudo apt-get install -y ninja-build cmake python3-pip
+        pip3 install conan
         
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'
+    - name: Setup Conan
+      run: |
+        conan profile detect --force
+        
+    - name: Install dependencies with Conan
+      run: |
+        conan install . --output-folder=build --build=missing -s build_type=Release
         
     - name: Configure CMake
       run: |
-        export VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT
-        cmake --preset=ci
+        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake
         
     - name: Build
-      run: cmake --build build-ci
+      run: cmake --build build
       
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: SDL3Wheels-Linux
-        path: build-ci/SDL3Wheels
+        path: build/SDL3Wheels
         
   build-windows:
     runs-on: windows-latest
@@ -55,28 +58,32 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Install Ninja
-      run: choco install ninja
+    - name: Install dependencies
+      run: |
+        choco install ninja
+        pip install conan
       
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'
+    - name: Setup Conan
+      run: |
+        conan profile detect --force
+        
+    - name: Install dependencies with Conan
+      run: |
+        conan install . --output-folder=build --build=missing -s build_type=Release
         
     - name: Configure CMake
       run: |
-        $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
-        cmake --preset=ci
+        cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake
       shell: pwsh
         
     - name: Build
-      run: cmake --build build-ci
+      run: cmake --build build
       
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: SDL3Wheels-Windows
-        path: build-ci/SDL3Wheels.exe
+        path: build/SDL3Wheels.exe
         
   test-qemu:
     runs-on: ubuntu-latest
@@ -93,7 +100,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: SDL3Wheels-Linux
-        path: ./build-ci
+        path: ./build
         
     - name: Install QEMU
       run: |
@@ -102,8 +109,8 @@ jobs:
         
     - name: Test with QEMU (dry run)
       run: |
-        chmod +x ./build-ci/SDL3Wheels
+        chmod +x ./build/SDL3Wheels
         # Note: SDL3 requires display, so we just verify the binary can be loaded
-        file ./build-ci/SDL3Wheels
-        ldd ./build-ci/SDL3Wheels || true
+        file ./build/SDL3Wheels
+        ldd ./build/SDL3Wheels || true
         echo "QEMU test completed (display required for full test)"

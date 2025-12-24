@@ -1,8 +1,0 @@
-{
-  "name": "sdl3wheels",
-  "version": "0.1.0",
-  "description": "SDL clone of Wacky Wheels",
-  "dependencies": [
-    "sdl2"
-  ]
-}

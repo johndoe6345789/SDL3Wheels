@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Find SDL2
-find_package(SDL2 REQUIRED CONFIG)
+# Find SDL3 via Conan
+find_package(SDL3 REQUIRED CONFIG)
 
 # Source files
 set(SOURCES
@@ -16,7 +16,7 @@ set(SOURCES
     src/kart.cpp
     src/track.cpp
     src/input_handler.cpp
-    src/renderer.cpp
+    src/sdl3_renderer.cpp
 )
 
 set(HEADERS
@@ -24,7 +24,8 @@ set(HEADERS
     include/kart.h
     include/track.h
     include/input_handler.h
-    include/renderer.h
+    include/i_renderer.h
+    include/sdl3_renderer.h
 )
 
 # Create executable
@@ -34,10 +35,9 @@ target_include_directories(SDL3Wheels PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# Link SDL2
+# Link SDL3
 target_link_libraries(SDL3Wheels PRIVATE 
-    SDL2::SDL2
-    SDL2::SDL2main
+    SDL3::SDL3
 )
 
 # Copy assets to build directory
