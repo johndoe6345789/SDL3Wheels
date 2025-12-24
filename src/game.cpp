@@ -194,10 +194,12 @@ void Game::updateRacing(float deltaTime) {
         
         // Check checkpoints
         Vector2 pos = kart->getPosition();
-        int newCheckpoint = track_->checkCheckpoint(pos.x, pos.y, kart->getCheckpoint());
-        if (newCheckpoint != kart->getCheckpoint()) {
+        int oldCheckpoint = kart->getCheckpoint();
+        int newCheckpoint = track_->checkCheckpoint(pos.x, pos.y, oldCheckpoint);
+        if (newCheckpoint != oldCheckpoint) {
             kart->setCheckpoint(newCheckpoint);
-            if (newCheckpoint == 0 && kart->getCheckpoint() > 0) {
+            // If we crossed the start/finish line (checkpoint 0) after completing a lap
+            if (newCheckpoint == 0 && oldCheckpoint > 0) {
                 kart->incrementLap();
             }
         }
