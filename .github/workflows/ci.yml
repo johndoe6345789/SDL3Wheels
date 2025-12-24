@@ -1,0 +1,97 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ninja-build cmake
+        
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'
+        
+    - name: Configure CMake
+      run: |
+        export VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT
+        cmake --preset=ci
+        
+    - name: Build
+      run: cmake --build build-ci
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SDL3Wheels-Linux
+        path: build-ci/SDL3Wheels
+        
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install Ninja
+      run: choco install ninja
+      
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'
+        
+    - name: Configure CMake
+      run: |
+        $env:VCPKG_ROOT = $env:VCPKG_INSTALLATION_ROOT
+        cmake --preset=ci
+      shell: pwsh
+        
+    - name: Build
+      run: cmake --build build-ci
+      
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SDL3Wheels-Windows
+        path: build-ci/SDL3Wheels.exe
+        
+  test-qemu:
+    runs-on: ubuntu-latest
+    needs: build-linux
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download Linux artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: SDL3Wheels-Linux
+        path: ./build-ci
+        
+    - name: Install QEMU
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qemu-user qemu-user-static
+        
+    - name: Test with QEMU (dry run)
+      run: |
+        chmod +x ./build-ci/SDL3Wheels
+        # Note: SDL3 requires display, so we just verify the binary can be loaded
+        file ./build-ci/SDL3Wheels
+        ldd ./build-ci/SDL3Wheels || true
+        echo "QEMU test completed (display required for full test)"

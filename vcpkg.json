@@ -1,0 +1,16 @@
+{
+  "name": "sdl3wheels",
+  "version": "0.1.0",
+  "description": "SDL3 clone of Wacky Wheels",
+  "dependencies": [
+    {
+      "name": "sdl3",
+      "default-features": true
+    },
+    {
+      "name": "sdl3-image",
+      "default-features": true
+    }
+  ],
+  "builtin-baseline": "master"
+}
