@@ -6,9 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Find SDL3
-find_package(SDL3 REQUIRED CONFIG REQUIRED COMPONENTS SDL3)
-find_package(SDL3_image CONFIG REQUIRED)
+# Find SDL2
+find_package(SDL2 REQUIRED CONFIG)
 
 # Source files
 set(SOURCES
@@ -35,10 +34,10 @@ target_include_directories(SDL3Wheels PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# Link SDL3
+# Link SDL2
 target_link_libraries(SDL3Wheels PRIVATE 
-    SDL3::SDL3
-    SDL3_image::SDL3_image
+    SDL2::SDL2
+    SDL2::SDL2main
 )
 
 # Copy assets to build directory

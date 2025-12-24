@@ -75,7 +75,7 @@ void Renderer::renderKart(const Kart* kart) {
     float dirY = pos.y + SDL_sinf(radians) * 20;
     
     SDL_SetRenderDrawColor(sdlRenderer_, 255, 255, 255, 255);
-    SDL_RenderLine(sdlRenderer_, pos.x, pos.y, dirX, dirY);
+    SDL_RenderDrawLineF(sdlRenderer_, pos.x, pos.y, dirX, dirY);
 }
 
 void Renderer::renderHUD(int currentLap, int totalLaps, float raceTime) {
@@ -129,16 +129,16 @@ void Renderer::drawText(const std::string& text, int x, int y, int size) {
         };
         
         SDL_SetRenderDrawColor(sdlRenderer_, 255, 255, 255, 255);
-        SDL_RenderFillRect(sdlRenderer_, &charRect);
+        SDL_RenderFillRectF(sdlRenderer_, &charRect);
     }
 }
 
 void Renderer::drawRect(const SDL_FRect& rect, SDL_Color color) {
     SDL_SetRenderDrawColor(sdlRenderer_, color.r, color.g, color.b, color.a);
-    SDL_RenderRect(sdlRenderer_, &rect);
+    SDL_RenderDrawRectF(sdlRenderer_, &rect);
 }
 
 void Renderer::fillRect(const SDL_FRect& rect, SDL_Color color) {
     SDL_SetRenderDrawColor(sdlRenderer_, color.r, color.g, color.b, color.a);
-    SDL_RenderFillRect(sdlRenderer_, &rect);
+    SDL_RenderFillRectF(sdlRenderer_, &rect);
 }

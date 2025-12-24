@@ -16,11 +16,11 @@ void InputHandler::update() {
 }
 
 bool InputHandler::isKeyPressed(SDL_Scancode key) const {
-    return currentKeyStates_[key];
+    return currentKeyStates_[key] != 0;
 }
 
 bool InputHandler::wasKeyJustPressed(SDL_Scancode key) const {
-    return currentKeyStates_[key] && !previousKeyStates_[key];
+    return (currentKeyStates_[key] != 0) && (previousKeyStates_[key] == 0);
 }
 
 bool InputHandler::isAccelerating() const {

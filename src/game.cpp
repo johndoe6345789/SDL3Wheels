@@ -21,15 +21,16 @@ Game::~Game() {
 }
 
 bool Game::init() {
-    if (!SDL_Init(SDL_INIT_VIDEO)) {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << std::endl;
         return false;
     }
     
     window_ = SDL_CreateWindow(
         "SDL3 Wheels - Wacky Wheels Clone",
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         800, 600,
-        SDL_WINDOW_RESIZABLE
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
     
     if (!window_) {
@@ -37,7 +38,7 @@ bool Game::init() {
         return false;
     }
     
-    sdlRenderer_ = SDL_CreateRenderer(window_, nullptr);
+    sdlRenderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!sdlRenderer_) {
         std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
         return false;
@@ -60,10 +61,10 @@ bool Game::init() {
 }
 
 void Game::run() {
-    Uint64 lastTime = SDL_GetTicks();
+    Uint32 lastTime = SDL_GetTicks();
     
     while (running_) {
-        Uint64 currentTime = SDL_GetTicks();
+        Uint32 currentTime = SDL_GetTicks();
         float deltaTime = (currentTime - lastTime) / 1000.0f;
         lastTime = currentTime;
         
@@ -98,10 +99,10 @@ void Game::shutdown() {
 void Game::handleEvents() {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_EVENT_QUIT) {
+        if (event.type == SDL_QUIT) {
             running_ = false;
         }
-        if (event.type == SDL_EVENT_KEY_DOWN && event.key.key == SDLK_ESCAPE) {
+        if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
             if (state_ == GameState::RACING) {
                 state_ = GameState::PAUSED;
             } else if (state_ == GameState::PAUSED) {
