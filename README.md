@@ -99,6 +99,20 @@ The project includes a GitHub Actions workflow that:
 - Includes QEMU testing support
 - Produces build artifacts
 
+### Diagnose workflow issues locally
+
+Use the bundled workflow doctor to spot common GitHub Actions pitfalls (mismatched
+artifact names, missing job dependencies, unpinned actions) without executing
+the pipelines:
+
+```bash
+python tools/workflow_doctor.py           # Analyze all workflows
+python tools/workflow_doctor.py --strict  # Treat warnings as errors
+```
+
+The script reads YAML via [PyYAML](https://pyyaml.org/) when available and
+falls back to a helpful error message if the dependency is missing.
+
 ## Project Structure
 
 ```
